@@ -1,0 +1,5 @@
+vendor
+storage/framework
+storage/logs
+guideline
+.env
