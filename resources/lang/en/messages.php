@@ -1022,6 +1022,7 @@
   'color_scheme.default' => 'System default',
   'color_scheme.green' => 'Green',
   'color_scheme.grey' => 'Grey',
+  'color_scheme.orange' => 'Orange',
   'color_scheme.pink' => 'Pink',
   'color_scheme.white' => 'White',
   'columns' => 'Columns',

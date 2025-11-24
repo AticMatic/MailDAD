@@ -5,3 +5,4 @@
 <label><input type="radio" name="color_scheme" title="{{ trans('messages.color_scheme.pink') }}" value="pink" {{ $theme_color == 'pink' ? 'checked' : '' }} class="xtooltip color-scheme-select scheme-pink" /></label>
 <label><input type="radio" name="color_scheme" title="{{ trans('messages.color_scheme.grey') }}" value="grey" {{ $theme_color == 'grey' ? 'checked' : '' }} class="xtooltip color-scheme-select scheme-grey" /></label>
 <label><input type="radio" name="color_scheme" title="{{ trans('messages.color_scheme.white') }}" value="white" {{ $theme_color == 'white' ? 'checked' : '' }} class="xtooltip color-scheme-select scheme-white" /></label>
+<label><input type="radio" name="color_scheme" title="{{ trans('messages.color_scheme.orange') }}" value="orange" {{ $theme_color == 'orange' ? 'checked' : '' }} class="xtooltip color-scheme-select scheme-orange" /></label>
