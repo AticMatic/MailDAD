@@ -1,5 +1,9 @@
-vendor
-storage/framework
-storage/logs
-guideline
+/vendor
+/storage
+/public/storage
+/public/setting
+/public/vendor
+/resources/views/vendor
 .env
+.DS_Store
+
