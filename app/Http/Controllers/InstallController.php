@@ -159,18 +159,35 @@ class InstallController extends Controller
             if ($request->mail_mailer == 'smtp') {
                 $rules = [];
                 try {
-                    $transport = new \Swift_SmtpTransport($request->smtp_hostname, $request->smtp_port, $request->smtp_encryption);
+                    $transport = new \Swift_SmtpTransport(
+                        $request->smtp_hostname,
+                        $request->smtp_port,
+                        $request->smtp_encryption
+                    );
+
                     $transport->setUsername($request->smtp_username);
                     $transport->setPassword($request->smtp_password);
+
+                    // Disable SSL verification for SMTP test
+                    $transport->setStreamOptions([
+                        'ssl' => [
+                            'allow_self_signed' => true,
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                        ],
+                    ]);
+
                     $mailer = new \Swift_Mailer($transport);
                     $mailer->getTransport()->start();
                 } catch (\Swift_TransportException $e) {
                     $rules['smtp_valid'] = 'required';
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $rules['smtp_valid'] = 'required';
                 }
+
                 $this->validate($request, $rules);
             }
+
 
             $request->session()->put('site_info', $site_info);
 
