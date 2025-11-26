@@ -23,6 +23,6 @@
 					{{ csrf_field() }}
 
 					@include('admin.bounce_handlers._form')
-				<form>
+				</form>
 
 @endsection
