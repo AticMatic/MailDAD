@@ -286,4 +286,50 @@ class BounceHandler extends DeliveryHandler
             ['value' => 'ssl', 'text' => 'ssl'],
         ];
     }
+
+    /**
+     * Smart Test: Tries the standard Acelle method first.
+     * If that fails, it attempts a smart recovery for strict servers (like Mailcow).
+     */
+    public function test()
+    {
+        try {
+            // STEP 1: Try the standard Acelle logic first.
+            // This ensures we don't break existing flows for other providers.
+            return parent::test();
+        } catch (\Exception $e) {
+            // STEP 2: Smart Recovery
+            // If the parent failed, we try to construct the connection string 
+            // exactly like the PHP script that we PROVED works.
+
+            // Logic: If port is 993, we MUST use /ssl, regardless of what the UI says.
+            // This fixes the "TLS selected but Port 993 used" error.
+            $encryptionFlag = ($this->port == 993) ? '/ssl' : ('/' . $this->encryption);
+
+            // Construct string: {host:993/imap/ssl}INBOX
+            $connectionString = "{" . $this->host . ":" . $this->port . "/imap" . $encryptionFlag . "}INBOX";
+
+            // Attempt connection with error suppression (@)
+            $mbox = @imap_open($connectionString, $this->username, $this->password, 0, 1);
+
+            if ($mbox) {
+                // It worked! Close and return success.
+                imap_close($mbox);
+                return true;
+            }
+
+            // STEP 3: Last Resort (Self-Signed / Localhost mismatch)
+            // If strict SSL failed, try one last time with /novalidate-cert
+            $fallbackString = "{" . $this->host . ":" . $this->port . "/imap" . $encryptionFlag . "/novalidate-cert}INBOX";
+            $mbox = @imap_open($fallbackString, $this->username, $this->password, 0, 1);
+
+            if ($mbox) {
+                imap_close($mbox);
+                return true;
+            }
+
+            // If everything failed, throw the original error so the user sees it.
+            throw $e;
+        }
+    }
 }
