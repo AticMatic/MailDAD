@@ -107,24 +107,29 @@
             e.preventDefault();
             var url = $(this).attr('href');
 
+            // FIX: Grab all form data so the server knows what to test!
+            var form = $(this).closest('form');
+            var formData = {};
+
+            // Convert form fields to a clean object
+            $.each(form.serializeArray(), function() {
+                formData[this.name] = this.value;
+            });
+
             addMaskLoading();
 
             new Link({
                 type: 'ajax',
                 url: url,
                 method: 'POST',
+                data: formData, // <--- Send the actual data here
                 done: function(response) {
                     new Dialog('alert', {
                         message: response.message,
                     });
-
                     removeMaskLoading();
-                },
-                data: {
-                    _token: CSRF_TOKEN
                 }
             });
         });
-
     });
 </script>

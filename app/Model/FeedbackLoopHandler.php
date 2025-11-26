@@ -264,4 +264,97 @@ class FeedbackLoopHandler extends DeliveryHandler
             ['value' => 'ssl', 'text' => 'ssl'],
         ];
     }
+
+    // =============================================================
+    // CUSTOM OVERRIDE FOR MAILCOW CONNECTION
+    // =============================================================
+
+    /**
+     * Smart Test: Tries standard logic, then falls back to our Mailcow-specific fix.
+     */
+    public function test()
+    {
+        // Safety Check: Did the form data arrive?
+        if (empty($this->host) || empty($this->port)) {
+            throw new \Exception("DATA ERROR: Hostname or Port is empty. Save the form first or check the Test button JS.");
+        }
+
+        try {
+            // 1. Try standard Acelle logic first
+            return parent::test();
+        } catch (\Exception $e) {
+            // 2. Smart Recovery for Mailcow/SSL
+
+            // Force /ssl tag if port is 993
+            $enc = ($this->port == 993) ? '/ssl' : ('/' . $this->encryption);
+
+            // Construct exact working string: {host:993/imap/ssl}INBOX
+            $connectionString = "{" . $this->host . ":" . $this->port . "/imap" . $enc . "}INBOX";
+
+            // Attempt connection (suppress warnings with @)
+            $mbox = @imap_open($connectionString, $this->username, $this->password, 0, 1);
+
+            if ($mbox) {
+                imap_close($mbox);
+                return true;
+            }
+
+            // 3. Last Resort: Novalidate Cert
+            $fallbackString = "{" . $this->host . ":" . $this->port . "/imap" . $enc . "/novalidate-cert}INBOX";
+            $mbox = @imap_open($fallbackString, $this->username, $this->password, 0, 1);
+
+            if ($mbox) {
+                imap_close($mbox);
+                return true;
+            }
+
+            // If all failed, show the error
+            throw $e;
+        }
+    }
+
+    /**
+     * Override start() to ensure background processing works too
+     */
+    public function start($debug = false)
+    {
+        $this->logger()->info("Starting Feedback Loop Handler...");
+
+        $enc = ($this->port == 993) ? '/ssl' : ('/' . $this->encryption);
+        $connectionString = "{" . $this->host . ":" . $this->port . "/imap" . $enc . "}INBOX";
+
+        try {
+            // Try connection
+            $inbox = @imap_open($connectionString, $this->username, $this->password);
+
+            // Fallback
+            if (!$inbox) {
+                $fallbackString = "{" . $this->host . ":" . $this->port . "/imap" . $enc . "/novalidate-cert}INBOX";
+                $inbox = @imap_open($fallbackString, $this->username, $this->password);
+            }
+
+            if (!$inbox) {
+                throw new \Exception("Cannot connect: " . imap_last_error());
+            }
+
+            // Process emails
+            $emails = imap_search($inbox, 'UNSEEN');
+            if (!empty($emails)) {
+                $this->logger()->info(sprintf('%s unread feedback emails found', sizeof($emails)));
+                foreach ($emails as $message) {
+                    $this->processMessage($inbox, $message);
+                }
+            }
+
+            imap_expunge($inbox);
+            imap_close($inbox);
+        } catch (\Exception $e) {
+            if ($debug) {
+                echo $e->getMessage();
+            }
+            $this->logger()->error('Failed. ' . $e->getMessage());
+        } finally {
+            $this->logger()->info("Done!");
+        }
+    }
 }
