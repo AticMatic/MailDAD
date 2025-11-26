@@ -88,17 +88,19 @@
 </div>
 <hr>
 <div class="text-left">
-    @can('test', $server)
-        <a
-            href="{{ action('Admin\FeedbackLoopHandlerController@test', $server->uid) }}"
-            role="button"
-            class="btn btn-primary me-1 test-button"
-            data-in-form="true"
-            mask-title="{{ trans('messages.feedback_loop_handler.testing_connection') }}"
-        >
-            <span class="material-symbols-rounded">quiz</span> {{ trans('messages.feedback_loop_handler.test') }}
-        </a>
-    @endcan
+    @if($server->uid != '0')
+        @can('test', $server)
+            <a
+                href="{{ action('Admin\FeedbackLoopHandlerController@test', $server->uid) }}"
+                role="button"
+                class="btn btn-primary me-1 test-button"
+                data-in-form="true"
+                mask-title="{{ trans('messages.feedback_loop_handler.testing_connection') }}"
+            >
+                <span class="material-symbols-rounded">quiz</span> {{ trans('messages.feedback_loop_handler.test') }}
+            </a>
+        @endcan
+    @endif
     <button class="btn btn-secondary"><i class="icon-check"></i> {{ trans('messages.save') }}</button>
 </div>
 
