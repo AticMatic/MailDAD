@@ -515,7 +515,17 @@ class SendingDomain extends Model
 
     public function getVerificationTokens()
     {
-        return json_decode($this->verification_token, true);
+        $tokens = json_decode($this->verification_token, true);
+        if (is_null($tokens)) {
+            return [
+                'identity' => ['name' => '', 'value' => '', 'type' => 'TXT'],
+                'dkim' => [],
+                'spf' => [],
+                'dmarc' => [],
+                'results' => ['identity' => false, 'dkim' => false, 'spf' => false, 'dmarc' => false]
+            ];
+        }
+        return $tokens;
     }
 
     public function updateVerificationTokens($tokens)
