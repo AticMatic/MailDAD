@@ -278,7 +278,7 @@ class SendingDomainController extends Controller
             // Log error or handle gracefully
             // For now, return empty view or initialize with empty array to prevent crash
              $tokens = [
-                'identity' => ['name' => '', 'value' => ''],
+                'identity' => ['name' => '', 'value' => '', 'type' => 'TXT'],
                 'dkim' => [],
                 'spf' => [],
                 'dmarc' => [],
