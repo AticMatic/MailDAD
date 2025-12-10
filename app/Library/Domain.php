@@ -80,7 +80,9 @@ class Domain
         $quoted = doublequote($raw);
         $escaped = str_replace(';', '\;', $quoted);
 
-        $possibles = collect([$raw, $quoted, $quoted]);
+        $rawNoSemicolon = rtrim($raw, ';');
+
+        $possibles = collect([$raw, $quoted, $escaped, $rawNoSemicolon]);
         $possibles = $possibles->map(function ($item, $key) {
             return preg_replace('/\s+/', '', $item);
         });
