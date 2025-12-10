@@ -273,11 +273,27 @@ class SendingDomainController extends Controller
         $domain = SendingDomain::findByUid($id);
 
         $tokens = json_decode($domain->verification_token, true);
-        $identity = $tokens['identity'];
-        $dkims = $tokens['dkim'];
+        
+        if (is_null($tokens)) {
+            // Log error or handle gracefully
+            // For now, return empty view or initialize with empty array to prevent crash
+             $tokens = [
+                'identity' => ['name' => '', 'value' => ''],
+                'dkim' => [],
+                'spf' => [],
+                'dmarc' => [],
+                'results' => []
+            ];
+            // Optionally try to verify again if tokens are missing?
+            // $domain->verify(); 
+            // $tokens = json_decode($domain->verification_token, true);
+        }
+
+        $identity = $tokens['identity'] ?? [];
+        $dkims = $tokens['dkim'] ?? [];
         $spf = array_key_exists('spf', $tokens) ? $tokens['spf'] : null;
         $dmarc = array_key_exists('dmarc', $tokens) ? $tokens['dmarc'] : null;
-        $results = $tokens['results'];
+        $results = $tokens['results'] ?? [];
 
         Hook::execute(
             'filter_aws_ses_dns_records',

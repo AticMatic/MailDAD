@@ -64,6 +64,8 @@ class SendingServerMailcow extends SendingServerSmtp
 
     public function addDomain($domain)
     {
+        MailLog::info("SendingServerMailcow::addDomain - Starting for domain: " . $domain);
+        
         // Check if domain exists
         try {
             $response = $this->client()->get('/api/v1/get/domain/' . $domain);

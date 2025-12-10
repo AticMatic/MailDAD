@@ -26,12 +26,16 @@ use Illuminate\Database\Eloquent\Model;
 use Acelle\Library\MtaSync;
 use Acelle\Library\Traits\HasUid;
 use Validator;
-use DB;
+// DB alias removed (using Facade import)
 use Exception;
 use Mika56\SPFCheck\SPFCheck;
 use Acelle\Library\Domain;
 
 use function Acelle\Helpers\spfcheck;
+
+use Illuminate\Support\Facades\Log; // For MailLog alias usage if needed, but we use Acelle\Library\Log usually.
+use Acelle\Library\Log as MailLog;
+use Illuminate\Support\Facades\DB;
 
 class SendingDomain extends Model
 {
@@ -269,7 +273,11 @@ class SendingDomain extends Model
             $tokens = $this->generateVerificationTokens();
         }
 
-        $this->updateVerificationTokens($tokens);
+        if (!is_null($tokens)) {
+            $this->updateVerificationTokens($tokens);
+        } else {
+            MailLog::error("SendingDomain::startVerifying - Verification tokens are null for domain: " . $this->name);
+        }
     }
 
     public function generateVerificationTokens()
