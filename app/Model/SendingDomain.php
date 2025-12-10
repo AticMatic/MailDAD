@@ -520,8 +520,6 @@ class SendingDomain extends Model
             return [
                 'identity' => ['name' => '', 'value' => '', 'type' => 'TXT'],
                 'dkim' => [],
-                'spf' => [],
-                'dmarc' => [],
                 'results' => ['identity' => false, 'dkim' => false, 'spf' => false, 'dmarc' => false]
             ];
         }

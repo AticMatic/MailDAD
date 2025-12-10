@@ -280,8 +280,6 @@ class SendingDomainController extends Controller
              $tokens = [
                 'identity' => ['name' => '', 'value' => '', 'type' => 'TXT'],
                 'dkim' => [],
-                'spf' => [],
-                'dmarc' => [],
                 'results' => []
             ];
             // Optionally try to verify again if tokens are missing?
