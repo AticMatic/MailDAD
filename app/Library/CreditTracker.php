@@ -50,7 +50,7 @@ class CreditTracker
     private function test()
     {
         if ($this->getRemainingCredits() == self::ZERO) {
-            throw new OutOfCredits('Credits exceeded'.$this->filepath);
+            throw new OutOfCredits('Credits exceeded '.$this->filepath);
         }
     }
 

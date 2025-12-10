@@ -3,7 +3,7 @@
 namespace Acelle\Jobs;
 
 use Illuminate\Bus\Batchable;
-use Acelle\Library\Exception\NoCreditsLeft;
+use Acelle\Library\Exception\OutOfCredits;
 use Acelle\Library\Exception\RateLimitExceeded;
 use Acelle\Library\Exception\VerificationTakesLongerThanNormal;
 use Acelle\Library\Exception\RateLimitReservedByAnotherFileSystem;
@@ -85,6 +85,8 @@ class VerifySubscriber extends Base
             execute_with_limits($rateTrackers, $pool = null, $creditTrackers, function () {
                 $this->subscriber->verify($this->server);
             });
+        } catch (OutOfCredits $ex) {
+            return;
         } catch (RateLimitReservedByAnotherFileSystem $ex) {
             $this->release(1);
         } catch (VerificationTakesLongerThanNormal $ex) {
