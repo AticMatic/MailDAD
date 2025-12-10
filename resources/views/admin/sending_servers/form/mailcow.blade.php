@@ -17,10 +17,12 @@
                     'type' => 'text',
                     'class' => '',
                     'name' => 'host',
+                    'label' => 'Mailcow Hostname',
                     'value' => $server->host,
                     'help_class' => 'sending_server',
                     'rules' => $server->getRules(),
-                    'disabled' =>($server->id && $errors->isEmpty()),                    
+                    'disabled' =>($server->id && $errors->isEmpty()),
+                    'help' => 'The hostname of your Mailcow server (e.g. host.maildad.site).',
                 ])
 
                 @include('helpers.form_control', [
