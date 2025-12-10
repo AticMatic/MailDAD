@@ -36,6 +36,7 @@ use Acelle\Library\DynamicRateTracker;
 use Exception;
 use Acelle\Library\Traits\HasUid;
 use Acelle\Library\Traits\HasCache;
+use Illuminate\Support\Facades\Validator;
 
 class SendingServer extends Model
 {
@@ -65,6 +66,8 @@ class SendingServer extends Model
 
     public const TYPE_BLASTENGINE_API = 'blastengine-api';
     public const TYPE_BLASTENGINE_SMTP = 'blastengine-smtp';
+
+    public const TYPE_MAILCOW = 'mailcow';
 
     protected $quotaTracker;
 
@@ -97,6 +100,8 @@ class SendingServer extends Model
 
         self::TYPE_BLASTENGINE_API => 'SendingServerBlastengineApi',
         self::TYPE_BLASTENGINE_SMTP => 'SendingServerBlastengineSmtp',
+        
+        self::TYPE_MAILCOW => 'SendingServerMailcow',
     );
 
     /**
@@ -196,7 +201,7 @@ class SendingServer extends Model
     public function getVerp($recipient)
     {
         if ($this->bounceHandler) {
-            $validator = \Validator::make(
+            $validator = Validator::make(
                 ['email' => $this->bounceHandler->username],
                 ['email' => 'required|email']
             );
@@ -461,6 +466,22 @@ class SendingServer extends Model
                     'default_from_email' => 'email',
                 ],
             ],
+            self::TYPE_MAILCOW => [
+                'cols' => [
+                    'host' => 'required',
+                    'api_key' => 'required',
+                    'smtp_username' => 'required',
+                    'smtp_password' => 'required',
+                    'smtp_port' => 'required',
+                    'smtp_protocol' => 'required',
+                ],
+                'settings' => [
+                    'name' => 'required',
+                    'default_from_email' => 'email',
+                    'bounce_handler_id' => '',
+                    'feedback_loop_handler_id' => '',
+                ],
+            ],
         ];
 
         // In case only one type of sending server is allowed
@@ -623,6 +644,20 @@ class SendingServer extends Model
                     'default_from_email' => 'email',
                 ],
             ],
+            self::TYPE_MAILCOW => [
+                'cols' => [
+                    'name' => 'required',
+                    'host' => 'required',
+                    'api_key' => 'required',
+                    'smtp_username' => 'required',
+                    'smtp_password' => 'required',
+                    'smtp_port' => 'required',
+                    'smtp_protocol' => 'required',
+                    'default_from_email' => 'email',
+                    'bounce_handler_id' => '',
+                    'feedback_loop_handler_id' => '',
+                ],
+            ],
         ];
     }
 
@@ -723,7 +758,7 @@ class SendingServer extends Model
      */
     public function validConnection($params)
     {
-        $validator = \Validator::make($params, $this->getRules(), $this->getCustomValidationError());
+        $validator = Validator::make($params, $this->getRules(), $this->getCustomValidationError());
 
         // test amazon api connection
         $validator->after(function ($validator) {

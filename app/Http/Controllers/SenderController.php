@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Acelle\Http\Controllers\Controller;
 use Acelle\Model\Sender;
 use Acelle\Model\SendingDomain;
+use Illuminate\Support\Facades\Gate;
 
 class SenderController extends Controller
 {
@@ -27,7 +28,7 @@ class SenderController extends Controller
      */
     public function index(Request $request)
     {
-        if (\Gate::denies('listing', new Sender())) {
+        if (Gate::denies('listing', new Sender())) {
             return $this->notAuthorized();
         }
 
@@ -65,7 +66,7 @@ class SenderController extends Controller
      */
     public function listing(Request $request)
     {
-        if (\Gate::denies('listing', new Sender())) {
+        if (Gate::denies('listing', new Sender())) {
             return $this->notAuthorized();
         }
 
@@ -86,7 +87,7 @@ class SenderController extends Controller
         $sender->fill($request->old());
 
         // authorize
-        if (\Gate::denies('create', $sender)) {
+        if (Gate::denies('create', $sender)) {
             return $this->notAuthorized();
         }
 
@@ -107,7 +108,7 @@ class SenderController extends Controller
         $sender = new Sender();
 
         // authorize
-        if (\Gate::denies('create', $sender)) {
+        if (Gate::denies('create', $sender)) {
             return $this->notAuthorized();
         }
 
@@ -128,6 +129,21 @@ class SenderController extends Controller
             $server = null;
         }
 
+        // AUTO-CREATE MAILBOX (MailDad Custom)
+        if ($server && $request->filled('mailbox_password')) {
+            $serverType = $server->mapType();
+            if (method_exists($serverType, 'createMailbox')) {
+                try {
+                    $serverType->createMailbox($sender->email, $request->mailbox_password, $sender->name);
+                    $request->session()->flash('alert-success', "Mailbox created on Mailcow server.");
+                } catch (\Exception $e) {
+                    $request->session()->flash('alert-danger', "Could not create mailbox: " . $e->getMessage());
+                    // Do not stop, let the standard verification proceed (or maybe return?)
+                    // If mailbox creation fails, verification email might not be received.
+                }
+            }
+        }
+
         $sender->verifyWith($server);
         return redirect()->action('SenderController@show', $sender->uid);
     }
@@ -145,7 +161,7 @@ class SenderController extends Controller
         $sender->updateVerificationStatus();
 
         // authorize
-        if (\Gate::denies('read', $sender)) {
+        if (Gate::denies('read', $sender)) {
             return $this->notAuthorized();
         }
 
@@ -166,7 +182,7 @@ class SenderController extends Controller
         $sender = Sender::findByUid($id);
 
         // authorize
-        if (\Gate::denies('update', $sender)) {
+        if (Gate::denies('update', $sender)) {
             return $this->notAuthorized();
         }
 
@@ -190,7 +206,7 @@ class SenderController extends Controller
         $sender = Sender::findByUid($id);
 
         // authorize
-        if (\Gate::denies('update', $sender)) {
+        if (Gate::denies('update', $sender)) {
             return $this->notAuthorized();
         }
 
@@ -295,7 +311,7 @@ class SenderController extends Controller
 
         if ($request->isMethod('post')) {
             // authorize
-            if (\Gate::denies('import', new Sender())) {
+            if (Gate::denies('import', new Sender())) {
                 return $this->notAuthorized();
             }
 

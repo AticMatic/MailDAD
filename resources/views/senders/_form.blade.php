@@ -20,6 +20,23 @@
 				'rules' => $sender->rules()
 			])
 
+            @if (!isset($sender->id))
+                <div class="mailbox-creation-group">
+                    <hr>
+                    <p class="small text-muted mb-2">Optional: Create mailbox on Mailcow server</p>
+                    @include('helpers.form_control', [
+                        'type' => 'password',
+                        'name' => 'mailbox_password',
+                        'label' => 'Mailbox Password',
+                        'value' => '',
+                        'help_class' => 'sender',
+                        'rules' => [],
+                        'eye' => true,
+                        'help' => 'Leave empty to only verify an existing email address. Enter a password to create this mailbox on the server.'
+                    ])
+                </div>
+            @endif
+
 		</div>
 		<div class="text-left">
 			<button class="btn btn-secondary me-1"><i class="icon-check"></i> {{ trans('messages.save') }}</button>
