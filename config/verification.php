@@ -115,6 +115,10 @@ return [
             'id' => 'nerverbounce.com',
             'name' => 'NerverBounce.com',
             'fields' => [ 'api_key' ],
+        ], [
+            'id' => 'jellyemail',
+            'name' => 'JellyEmail',
+            'fields' => [ 'url', 'api_token' ],
         ]
 
     ]

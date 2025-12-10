@@ -26,6 +26,7 @@ use Acelle\Library\Everification\VerifiedEmails;
 use Acelle\Library\Everification\Reoon;
 use Acelle\Library\Everification\EmailListVerify;
 use Acelle\Library\Everification\NerverBounce;
+use Acelle\Library\Everification\JellyEmail;
 
 class EmailVerificationServer extends Model
 {
@@ -115,6 +116,12 @@ class EmailVerificationServer extends Model
             case 'nerverbounce.com':
                 $apiKey = $this->getOptions()['api_key'];
                 $this->service = new NerverBounce($apiKey);
+                return $this->service;
+
+            case 'jellyemail':
+                $url = $this->getOptions()['url'];
+                $apiToken = $this->getOptions()['api_token'];
+                $this->service = new JellyEmail($url, $apiToken);
                 return $this->service;
 
             default:
